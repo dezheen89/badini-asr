@@ -60,7 +60,7 @@ try:
         dummy_audio,
         sampling_rate=TARGET_SR,
         return_tensors="pt",
-        padding=False
+        padding=True
     )
     if "input_values" in dummy_inputs:
         dummy_model_inputs = {"input_values": dummy_inputs["input_values"].to(device)}
@@ -172,7 +172,7 @@ def handler(job):
             audio,
             sampling_rate=TARGET_SR,
             return_tensors="pt",
-            padding=False
+            padding=True
         )
 
         if "input_values" in inputs:
