@@ -19,10 +19,13 @@ RUN mkdir -p /app/model_cache
 
 # Pre-download the model into the image at build time
 ARG HF_TOKEN
+ENV HF_TOKEN=${HF_TOKEN}
 RUN python -c "\
+import os; \
+token = os.environ['HF_TOKEN']; \
 from transformers import AutoProcessor, AutoModelForCTC; \
-AutoProcessor.from_pretrained('BadiniAI/BadiniW2VBert', token='${HF_TOKEN}', cache_dir='/app/model_cache'); \
-AutoModelForCTC.from_pretrained('BadiniAI/BadiniW2VBert', token='${HF_TOKEN}', cache_dir='/app/model_cache'); \
+AutoProcessor.from_pretrained('BadiniAI/BadiniW2VBert', token=token, cache_dir='/app/model_cache'); \
+AutoModelForCTC.from_pretrained('BadiniAI/BadiniW2VBert', token=token, cache_dir='/app/model_cache'); \
 print('Model pre-downloaded successfully.')"
 
 COPY runpod_handler.py .
