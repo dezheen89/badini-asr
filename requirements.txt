@@ -1,0 +1,10 @@
+runpod
+transformers==4.41.2
+huggingface_hub>=0.23.0
+soundfile
+numpy==1.26.4
+sentencepiece
+safetensors
+accelerate
+librosa==0.10.2.post1
+ffmpeg-python
