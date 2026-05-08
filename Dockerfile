@@ -1,4 +1,4 @@
-FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -10,7 +10,11 @@ ENV MODEL_DIR=/app/model_cache
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     libsndfile1 \
+    git \
     && rm -rf /var/lib/apt/lists/*
+
+# Install PyTorch with CUDA support
+RUN pip install torch==2.4.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu124
 
 COPY requirements.txt .
 RUN pip install --default-timeout=200 -r requirements.txt
