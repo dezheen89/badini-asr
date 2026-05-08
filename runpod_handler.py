@@ -45,12 +45,9 @@ model = AutoModelForCTC.from_pretrained(
 
 model.eval()
 
-if device == "cuda":
-    try:
-        model = torch.compile(model)
-        print("torch.compile enabled")
-    except Exception as e:
-        print(f"torch.compile skipped: {e}")
+# torch.compile disabled - requires C compiler which isn't in slim image
+# Model still runs fast on GPU without it
+print("Running without torch.compile (no C compiler in slim image)")
 
 # ── Warmup: run a dummy inference so CUDA kernels are compiled ──
 print("Running warmup inference...")
