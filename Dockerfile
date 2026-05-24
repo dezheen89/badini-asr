@@ -20,25 +20,47 @@ RUN pip install torch==2.4.0 torchaudio==2.4.0 --index-url https://download.pyto
 COPY requirements.txt .
 RUN pip install --default-timeout=200 -r requirements.txt
 
-# Create cache directory
 RUN mkdir -p /app/model_cache
 
-# Pre-download the model into the image at build time
+# ── Model download ─────────────────────────────────────────────────────────
+# ARG is declared first, then promoted to ENV so the RUN step can see it.
 ARG HF_TOKEN
-RUN HF_TOKEN=${HF_TOKEN} python -c "\
-import os; \
-from transformers import AutoProcessor, AutoModelForCTC; \
-token = os.environ.get('HF_TOKEN'); \
-print(f'Using token: {token[:10]}...'); \
-processor = AutoProcessor.from_pretrained('BadiniAI/BadiniW2VBert', token=token, cache_dir='/app/model_cache'); \
-model = AutoModelForCTC.from_pretrained('BadiniAI/BadiniW2VBert', token=token, cache_dir='/app/model_cache'); \
-print('Model pre-downloaded successfully.'); \
-import glob; \
-files = glob.glob('/app/model_cache/**/*', recursive=True); \
-print(f'Total files in cache: {len(files)}'); \
-"
+ARG MODEL_ID=BadiniAI/whisper-turbo
 
-# Verify cache contents
+# Promote to ENV so they are visible inside RUN
+ENV HF_TOKEN=${HF_TOKEN}
+ENV MODEL_ID=${MODEL_ID}
+
+RUN python - << 'PYEOF'
+import os, sys, glob
+from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
+
+token    = os.environ.get("HF_TOKEN", "").strip()
+model_id = os.environ.get("MODEL_ID", "BadiniAI/whisper-turbo").strip()
+cache    = "/app/model_cache"
+
+if not token:
+    print("ERROR: HF_TOKEN is empty — make sure the secret is set in GitHub.", flush=True)
+    sys.exit(1)
+
+print(f"Downloading model: {model_id}", flush=True)
+print(f"Token prefix: {token[:8]}...", flush=True)
+
+AutoProcessor.from_pretrained(
+    model_id, token=token, cache_dir=cache
+)
+AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_id, token=token, cache_dir=cache
+)
+
+files = glob.glob(f"{cache}/**/*", recursive=True)
+print(f"Done — {len(files)} files in cache.", flush=True)
+PYEOF
+
+# ── Scrub the token from the image layer ──────────────────────────────────
+# Good practice: unset the secret after it is no longer needed.
+ENV HF_TOKEN=""
+
 RUN ls -lh /app/model_cache && du -sh /app/model_cache
 
 COPY runpod_handler.py .
