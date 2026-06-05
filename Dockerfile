@@ -6,7 +6,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=1
 ENV HF_HOME=/app/model_cache
-ENV TRANSFORMERS_CACHE=/app/model_cache
 
 RUN apt-get update && apt-get install -y \
     ffmpeg \
@@ -14,8 +13,8 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install PyTorch with CUDA support
-RUN pip install torch==2.4.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu124
+# Install PyTorch with CUDA 12.1 — broadest GPU compatibility on RunPod
+RUN pip install torch==2.4.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 
 COPY requirements.txt .
 RUN pip install --default-timeout=200 -r requirements.txt
@@ -23,12 +22,10 @@ RUN pip install --default-timeout=200 -r requirements.txt
 RUN mkdir -p /app/model_cache
 
 # ── Model download ─────────────────────────────────────────────────────────
-# ARG is declared first, then promoted to ENV so the RUN step can see it.
 # Wav2Vec2-BERT (CTC) model — must match the handler, which uses AutoModelForCTC.
 ARG HF_TOKEN
 ARG MODEL_ID=BadiniAI/BadiniW2VBert
 
-# Promote to ENV so they are visible inside RUN
 ENV HF_TOKEN=${HF_TOKEN}
 ENV MODEL_ID=${MODEL_ID}
 
@@ -60,7 +57,6 @@ print(f"Done — {len(files)} files in cache.", flush=True)
 PYEOF
 
 # ── Scrub the token from the image layer ──────────────────────────────────
-# Good practice: unset the secret after it is no longer needed.
 ENV HF_TOKEN=""
 
 RUN ls -lh /app/model_cache && du -sh /app/model_cache
