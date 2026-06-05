@@ -24,8 +24,9 @@ RUN mkdir -p /app/model_cache
 
 # ── Model download ─────────────────────────────────────────────────────────
 # ARG is declared first, then promoted to ENV so the RUN step can see it.
+# Wav2Vec2-BERT (CTC) model — must match the handler, which uses AutoModelForCTC.
 ARG HF_TOKEN
-ARG MODEL_ID=BadiniAI/whisper-turbo
+ARG MODEL_ID=BadiniAI/BadiniW2VBert
 
 # Promote to ENV so they are visible inside RUN
 ENV HF_TOKEN=${HF_TOKEN}
@@ -33,10 +34,11 @@ ENV MODEL_ID=${MODEL_ID}
 
 RUN python - << 'PYEOF'
 import os, sys, glob
-from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
+# Wav2Vec2-BERT is a CTC model — use AutoModelForCTC (NOT SpeechSeq2Seq).
+from transformers import AutoProcessor, AutoModelForCTC
 
 token    = os.environ.get("HF_TOKEN", "").strip()
-model_id = os.environ.get("MODEL_ID", "BadiniAI/whisper-turbo").strip()
+model_id = os.environ.get("MODEL_ID", "BadiniAI/BadiniW2VBert").strip()
 cache    = "/app/model_cache"
 
 if not token:
@@ -49,7 +51,7 @@ print(f"Token prefix: {token[:8]}...", flush=True)
 AutoProcessor.from_pretrained(
     model_id, token=token, cache_dir=cache
 )
-AutoModelForSpeechSeq2Seq.from_pretrained(
+AutoModelForCTC.from_pretrained(
     model_id, token=token, cache_dir=cache
 )
 
