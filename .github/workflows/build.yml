@@ -19,7 +19,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Free up disk space — the model download + PyTorch can hit runner limits
       - name: Free disk space
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
@@ -40,11 +39,13 @@ jobs:
           context: .
           push: true
           no-cache: true
-          tags: dezheen89/badini-asr:latest
+          tags: |
+            dezheen89/badini-asr:latest
+            dezheen89/badini-asr:v2
           build-args: |
             HF_TOKEN=${{ secrets.HF_TOKEN }}
             MODEL_ID=BadiniAI/BadiniW2VBert
 
       - name: Print result
         run: |
-          echo "### ✅ Pushed: dezheen89/badini-asr:latest" >> "$GITHUB_STEP_SUMMARY"
+          echo "### ✅ Pushed: dezheen89/badini-asr:latest and :v2" >> "$GITHUB_STEP_SUMMARY"
