@@ -43,7 +43,7 @@ jobs:
           tags: dezheen89/badini-asr:latest
           build-args: |
             HF_TOKEN=${{ secrets.HF_TOKEN }}
-            MODEL_ID=BadiniAI/whisper-turbo
+            MODEL_ID=BadiniAI/BadiniW2VBert
 
       - name: Print result
         run: |
