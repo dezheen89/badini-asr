@@ -1,4 +1,4 @@
-FROM runpod/pytorch:2.2.0-py3.10-cuda11.8.0-devel-ubuntu22.04
+FROM pytorch/pytorch:2.2.2-cuda11.8-cudnn8-runtime
 
 WORKDIR /app
 
@@ -19,7 +19,6 @@ RUN pip install --default-timeout=200 -r requirements.txt
 RUN mkdir -p /app/model_cache
 
 # ── Model download ─────────────────────────────────────────────────────────
-# Wav2Vec2-BERT (CTC) model — must match the handler, which uses AutoModelForCTC.
 ARG HF_TOKEN
 ARG MODEL_ID=BadiniAI/BadiniW2VBert
 
