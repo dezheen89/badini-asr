@@ -1,4 +1,3 @@
-
 FROM runpod/pytorch:2.2.0-py3.10-cuda11.8.0-devel-ubuntu22.04
 
 WORKDIR /app
@@ -29,7 +28,6 @@ ENV MODEL_ID=${MODEL_ID}
 
 RUN python - << 'PYEOF'
 import os, sys, glob
-# Wav2Vec2-BERT is a CTC model — use AutoModelForCTC (NOT SpeechSeq2Seq).
 from transformers import AutoProcessor, AutoModelForCTC
 
 token    = os.environ.get("HF_TOKEN", "").strip()
