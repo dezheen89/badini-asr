@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04
 
 WORKDIR /app
 
@@ -12,9 +12,6 @@ RUN apt-get update && apt-get install -y \
     libsndfile1 \
     git \
     && rm -rf /var/lib/apt/lists/*
-
-# Install PyTorch with CUDA 12.1 — broadest GPU compatibility on RunPod
-RUN pip install torch==2.4.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu121
 
 COPY requirements.txt .
 RUN pip install --default-timeout=200 -r requirements.txt
